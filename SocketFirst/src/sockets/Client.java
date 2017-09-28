@@ -6,7 +6,7 @@ public class Client {
 
     public static void main(String[] args) {
         try {
-            Socket sock = new Socket("localhost", 444);
+            Socket sock = new Socket("designcookies.dk", 444);
             
             SendThread sendThread = new SendThread(sock);
             new Thread(sendThread).start();
