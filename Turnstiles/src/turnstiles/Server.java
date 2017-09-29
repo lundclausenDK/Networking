@@ -1,28 +1,49 @@
 package turnstiles;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class Server {
     
-    public static void main(String[] args) throws IOException {
+    static boolean isAlive = true;
+    
+    public static void main(String[] args) throws IOException, InterruptedException {
+        
         System.out.println("FOOTBALL STADIUM - TURNSTILE COUNTING SYSTEM INITIATED");
         System.out.println("******************************************************");
         System.out.println("30.000 seats available - Please start TurnstileClient...");
+     
         
-        int count = 0;
-        int clientTicket;
+        ExecutorService es = Executors.newCachedThreadPool();
         
         //String capitalizedSentence;
         ServerSocket welcomeSocket = new ServerSocket(6666);
+        welcomeSocket.setSoTimeout(3000);
         
-        while (count != 30000) {
-            Socket connectionSocket = welcomeSocket.accept();
+        while (isAlive) {
+
+            try {
+                Socket connectionSocket = welcomeSocket.accept();
+                
+                if (connectionSocket.isConnected()) {
+                    es.execute(new Turnstile(connectionSocket));
+                }
+                
+            } catch (Exception ex) {
+                System.out.println(ex.getMessage());
+            }
             
+            
+            
+            
+            
+            
+            
+            /*
             BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
             DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream());
             
@@ -35,8 +56,14 @@ public class Server {
             //capitalizedSentence = clientSentence.toUpperCase() + "\n";
             //outToClient.writeBytes(capitalizedSentence);
             outToClient.write(count);
+            */
         }
         
         System.out.println("Alle seats are occupied. Stadium full.");
+        
+        
+        welcomeSocket.close();
+        es.shutdownNow();
+        es.awaitTermination(1, TimeUnit.SECONDS);
     }
 }

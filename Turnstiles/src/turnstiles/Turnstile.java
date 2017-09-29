@@ -1,32 +1,47 @@
 package turnstiles;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.logging.*;
 
 public class Turnstile extends Thread {
 
-    private int ticket = 1;
+    static int ticket = 0;
     private Socket clientSocket;
+    private BufferedReader br;
+
+    public Turnstile(Socket s) {
+        clientSocket = s;
+    }
 
     @Override
     public void run() {
         try {
-            while (true) {
-                clientSocket = new Socket("localhost", 6666);
-                DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
-
-                outToServer.write(this.ticket);
-
-                clientSocket.close();
+            br = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            while (ticket != 30000) {
+                if (br.readLine().equalsIgnoreCase("turn")) {
+                    inc();
+                    System.out.println(ticket);
+                }
             }
-
-        } catch (IOException ex) {
+            
+            Server.isAlive = false;
+            br.close();
+            clientSocket.close();
+            
+        } catch (Exception ex) {
             System.out.println(ex.getMessage());
-            Logger.getLogger(TurnstileClient.class.getName()).log(Level.SEVERE, null, ex);
         }
         
+
+        //DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
+        //outToServer.write(this.ticket);
         //clientSocket.close();
+        //clientSocket.close();
+    }
+
+    synchronized void inc() {
+        ticket++;
     }
 
 }
