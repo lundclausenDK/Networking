@@ -27,7 +27,7 @@ public class ReceiveFromClientThread implements Runnable {
                     }
                     System.out.println("------------------------------------------");
                     System.out.println(date);
-                    System.out.println("From Client: " + messageString);
+                    System.out.println("From Client: " + messageString.toUpperCase());
                     System.out.println("------------------------------------------");
                     System.out.println("Please enter new message back to client...");
                 }
